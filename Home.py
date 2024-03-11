@@ -31,23 +31,22 @@ boto3_bedrock = session.client(
 def format_content(base64_encoded_images, query):
     """Format content"""
     content = []
+    template_image_id = '{"type": "text", "text": "Image {{image_id}}:"}'
+    template_image = '{"type": "image", "source": {"type": "base64","media_type": "image/jpeg","data": "{{image}}"} }'
     if base64_encoded_images:
-        if len(base64_encoded_images) == 1:
-            template_string = '{"type": "image", "source": {"type": "base64","media_type": "image/jpeg","data": "{{image}}"} }'
-            image_content = (
-                NativeEnvironment()
-                .from_string(template_string)
-                .render(image=base64_encoded_images[0])
-            )
-        else:
-            for idx, image in enumerate(base64_encoded_images):
-                template_string = '{"type": "text", "text": "Image {{number}}:" },{"type": "image", "source": {"type": "base64","media_type": "image/jpeg","data": "{{image}}"} }'
-                image_content = (
+        for idx, image in enumerate(base64_encoded_images):
+            if len(base64_encoded_images) > 1:
+                image_id = (
                     NativeEnvironment()
-                    .from_string(template_string)
-                    .render(number=idx + 1, image=image)
+                    .from_string(template_image_id)
+                    .render(image_id=idx + 1)
                 )
-        content.append(image_content)
+
+                content.append(image_id)
+            image_content = (
+                NativeEnvironment().from_string(template_image).render(image=image)
+            )
+            content.append(image_content)
     content.append(
         {
             "type": "text",
@@ -84,10 +83,13 @@ def read_images(system, images, query):
     """Describe the content of image"""
     base64_encoded_images = []
     images_size = ""
-    for image in images:
-        base64_encoded_image = base64.b64encode(image.getvalue()).decode("utf-8")
-        base64_encoded_images.append(base64_encoded_image)
-        images_size += f"{image.size // 1024} KB, "
+    if not images:
+        images_size = "0, "
+    else:
+        for image in images:
+            base64_encoded_image = base64.b64encode(image.getvalue()).decode("utf-8")
+            base64_encoded_images.append(base64_encoded_image)
+            images_size += f"{image.size // 1024} KB, "
     response = send_content(system, base64_encoded_images, query)
     if "error" in response:
         return response["error"]
@@ -103,9 +105,7 @@ def read_images(system, images, query):
 # UI
 st.header("Image Reader 👀", divider=True)
 
-system_prompt = st.sidebar.text_input("System prompt:", default_system_prompt)
-prompt = st.sidebar.text_input("User prompt:", default_prompt)
-take_photo = st.sidebar.toggle("📷")
+take_photo = st.sidebar.toggle("Use camera")
 
 source_window = st.sidebar.empty()
 clear = st.sidebar.button("Clear", type="primary")
@@ -125,12 +125,16 @@ with source_window:
             images = st.file_uploader(
                 "Choose pictures", accept_multiple_files=True, type=["jpg", "png"]
             )
+        system_prompt = st.text_area("System prompt:", default_system_prompt)
+        prompt = st.text_area("User prompt:", default_prompt)
         submitted = st.form_submit_button("Submit")
 
 with image_window:
     if submitted:
         if not images:
-            st.sidebar.warning("No images are chosen, but I will do it for you anyway.")
+            st.sidebar.warning(
+                "No images are chosen, but I will do it for you anyway in case thats what you want."
+            )
         else:
             st.image(images)
 
