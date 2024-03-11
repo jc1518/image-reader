@@ -75,11 +75,10 @@ def send_content(system, base64_encoded_images, query):
         )
         response_body = json.loads(response.get("body").read())
     except Exception as err:
-        response_body = {"error": str(err)}
+        raise
     return response_body
 
 
-# @st.cache_data(show_spinner=False)
 def send_content_with_response_stream(system, base64_encoded_images, query):
     """Send payload to bedrock claude 3 with response stream"""
     content = format_content(base64_encoded_images, query)
@@ -98,10 +97,11 @@ def send_content_with_response_stream(system, base64_encoded_images, query):
         )
         response_body = response.get("body")
     except Exception as err:
-        response_body = {"error": str(err)}
+        raise
     return response_body
 
 
+@st.cache_data(show_spinner=False)
 def read_images(system, images, query):
     """Describe the content of image"""
     base64_encoded_images = []
@@ -114,15 +114,12 @@ def read_images(system, images, query):
             base64_encoded_images.append(base64_encoded_image)
             images_size += f"{image.size // 1024} KB, "
     response = send_content(system, base64_encoded_images, query)
-    if "error" in response:
-        return response["error"]
-    else:
-        return (
-            f"{response['content'][0]['text']}\n\n"
-            f"----------------\n"
-            f"Image Size: {images_size}"
-            f"Model: {response['model']}, Input Tokens: {response['usage']['input_tokens']}, Output Tokens: {response['usage']['output_tokens']}"
-        )
+    return (
+        f"{response['content'][0]['text']}\n\n"
+        f"----------------\n"
+        f"Image Size: {images_size}"
+        f"Model: {response['model']}, Input Tokens: {response['usage']['input_tokens']}, Output Tokens: {response['usage']['output_tokens']}"
+    )
 
 
 def read_images_with_response_stream(system, images, query):
@@ -130,7 +127,7 @@ def read_images_with_response_stream(system, images, query):
     base64_encoded_images = []
     images_size = ""
     model = ""
-    if not images:
+    if not images or images == [None]:
         images_size = "0, "
     else:
         for image in images:
@@ -145,6 +142,7 @@ def read_images_with_response_stream(system, images, query):
                 data = json.loads(chunk.get("bytes").decode())
                 if data["type"] == "message_start":
                     model = data["message"]["model"]
+                    yield ("message_start")
                 if data["type"] == "content_block_delta":
                     yield (data.get("delta", {}).get("text", ""))
                 if data["type"] == "message_stop":
@@ -169,15 +167,10 @@ else:
     )
 
 prompt_window = st.sidebar.empty()
-clear = st.sidebar.button("Clear", type="primary")
 
 source_window = st.empty()
 image_window = st.empty()
 response_window = st.empty()
-
-if clear:
-    image_window.empty()
-    response_window.empty()
 
 with prompt_window:
     with st.form("prompt", clear_on_submit=False, border=False):
@@ -190,13 +183,17 @@ with image_window:
         st.image(images)
 
 if submitted:
-    if not images:
+    if not images or images == [None]:
         st.sidebar.warning(
             "No images are chosen, but I will do it for you anyway in case thats what you want."
         )
     response = ""
     with response_window:
-        stream = read_images_with_response_stream(system_prompt, images, prompt)
+        with st.spinner("Reading..."):
+            stream = read_images_with_response_stream(system_prompt, images, prompt)
+            for token in stream:
+                if token == "message_start":
+                    break
         for token in stream:
             response += token
-            st.write(response)
+            st.write(response.replace("$", "\$"))
