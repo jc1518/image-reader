@@ -79,6 +79,29 @@ def send_content(system, base64_encoded_images, query):
     return response_body
 
 
+# @st.cache_data(show_spinner=False)
+def send_content_with_response_stream(system, base64_encoded_images, query):
+    """Send payload to bedrock claude 3 with response stream"""
+    content = format_content(base64_encoded_images, query)
+    try:
+        response = boto3_bedrock.invoke_model_with_response_stream(
+            modelId=model_id,
+            body=json.dumps(
+                {
+                    "anthropic_version": anthropic_version,
+                    "max_tokens": 2000,
+                    "temperature": 0,
+                    "system": system,
+                    "messages": [{"role": "user", "content": content}],
+                }
+            ),
+        )
+        response_body = response.get("body")
+    except Exception as err:
+        response_body = {"error": str(err)}
+    return response_body
+
+
 def read_images(system, images, query):
     """Describe the content of image"""
     base64_encoded_images = []
@@ -102,14 +125,53 @@ def read_images(system, images, query):
         )
 
 
+def read_images_with_response_stream(system, images, query):
+    """Describe the content of image with response stream"""
+    base64_encoded_images = []
+    images_size = ""
+    model = ""
+    if not images:
+        images_size = "0, "
+    else:
+        for image in images:
+            base64_encoded_image = base64.b64encode(image.getvalue()).decode("utf-8")
+            base64_encoded_images.append(base64_encoded_image)
+            images_size += f"{image.size // 1024} KB, "
+    response = send_content_with_response_stream(system, base64_encoded_images, query)
+    if response:
+        for event in response:
+            chunk = event.get("chunk")
+            if chunk:
+                data = json.loads(chunk.get("bytes").decode())
+                if data["type"] == "message_start":
+                    model = data["message"]["model"]
+                if data["type"] == "content_block_delta":
+                    yield (data.get("delta", {}).get("text", ""))
+                if data["type"] == "message_stop":
+                    metrics = data["amazon-bedrock-invocationMetrics"]
+                    yield (
+                        f"\n\n----------------\n"
+                        f"*Image Size: {images_size}"
+                        f"Model: {model}, Input Tokens: {metrics['inputTokenCount']}, Output Tokens: {metrics['outputTokenCount']}, "
+                        f"Invocation Latency: {metrics['invocationLatency']} ms, First Byte Latency: {metrics['firstByteLatency']} ms.*"
+                    )
+
+
 # UI
 st.header("Image Reader 👀", divider=True)
 
 take_photo = st.sidebar.toggle("Use camera")
+if take_photo:
+    images = [st.camera_input("Camera")]
+else:
+    images = st.sidebar.file_uploader(
+        "Choose pictures", accept_multiple_files=True, type=["jpg", "png"]
+    )
 
-source_window = st.sidebar.empty()
+prompt_window = st.sidebar.empty()
 clear = st.sidebar.button("Clear", type="primary")
 
+source_window = st.empty()
 image_window = st.empty()
 response_window = st.empty()
 
@@ -117,29 +179,24 @@ if clear:
     image_window.empty()
     response_window.empty()
 
-with source_window:
-    with st.form("image-source", clear_on_submit=False, border=True):
-        if take_photo:
-            images = [st.camera_input("Camera")]
-        else:
-            images = st.file_uploader(
-                "Choose pictures", accept_multiple_files=True, type=["jpg", "png"]
-            )
+with prompt_window:
+    with st.form("prompt", clear_on_submit=False, border=False):
         system_prompt = st.text_area("System prompt:", default_system_prompt)
         prompt = st.text_area("User prompt:", default_prompt)
         submitted = st.form_submit_button("Submit")
 
 with image_window:
-    if submitted:
-        if not images:
-            st.sidebar.warning(
-                "No images are chosen, but I will do it for you anyway in case thats what you want."
-            )
-        else:
-            st.image(images)
+    if not take_photo:
+        st.image(images)
 
-with response_window:
-    if submitted:
-        with st.spinner("Reading images..."):
-            response = read_images(system_prompt, images, prompt)
-        st.write(response)
+if submitted:
+    if not images:
+        st.sidebar.warning(
+            "No images are chosen, but I will do it for you anyway in case thats what you want."
+        )
+    response = ""
+    with response_window:
+        stream = read_images_with_response_stream(system_prompt, images, prompt)
+        for token in stream:
+            response += token
+            st.write(response)

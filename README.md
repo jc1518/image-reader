@@ -15,3 +15,5 @@ A fun project to explore Claude 3 multimodal LLM (in Bedrock).
 ## Usage
 
 Setup AWS credentials, then run `streamlit run Home.py`.
+
+## Demo
