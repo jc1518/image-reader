@@ -1,0 +1,17 @@
+# Image Reader
+
+## Introduction
+
+A fun project to explore Claude 3 multimodal LLM (in Bedrock).
+
+## Requirements
+
+- Use `Python 3.11+`, and install dependencies: `pip install -r requirements.txt`.
+
+- Default bedrock region is `us-west-2`, change the value of `bedrock_region` accordinly if you use other regions.
+
+- Request access to `Claude 3 model` in Bedrock if you have not done that.
+
+## Usage
+
+Setup AWS credentials, then run `streamlit run Home.py`.
