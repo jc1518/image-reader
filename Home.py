@@ -15,7 +15,7 @@ boto_config = {"max_attempts": 3, "mode": "standard"}
 anthropic_version = "bedrock-2023-05-31"
 model_id = "anthropic.claude-3-sonnet-20240229-v1:0"
 model_args = {"temperature": 0, "max_tokens": 1000}
-default_system_prompt = "You are a helpful assistant."
+default_system_prompt = "You are a helpful assistant with perfect vision and pay great attention to detail which makes you an expert at reading objects in images."
 default_prompt = "What are in the picture?"
 
 
