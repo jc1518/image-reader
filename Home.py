@@ -13,7 +13,10 @@ from jinja2.nativetypes import NativeEnvironment
 bedrock_region = "us-west-2"
 boto_config = {"max_attempts": 3, "mode": "standard"}
 anthropic_version = "bedrock-2023-05-31"
-model_id = "anthropic.claude-3-sonnet-20240229-v1:0"
+model_ids = [
+    "anthropic.claude-3-sonnet-20240229-v1:0",
+    "anthropic.claude-3-haiku-20240307-v1:0",
+]
 model_args = {"temperature": 0, "max_tokens": 1000}
 default_system_prompt = "You are a helpful assistant with perfect vision and pay great attention to detail which makes you an expert at reading objects in images."
 default_prompt = "What are in the picture?"
@@ -57,7 +60,7 @@ def format_content(base64_encoded_images, query):
 
 
 @st.cache_data(show_spinner=False)
-def send_content(system, base64_encoded_images, query):
+def send_content(model_id, system, base64_encoded_images, query):
     """Send payload to bedrock claude 3"""
     content = format_content(base64_encoded_images, query)
     try:
@@ -79,7 +82,7 @@ def send_content(system, base64_encoded_images, query):
     return response_body
 
 
-def send_content_with_response_stream(system, base64_encoded_images, query):
+def send_content_with_response_stream(model_id, system, base64_encoded_images, query):
     """Send payload to bedrock claude 3 with response stream"""
     content = format_content(base64_encoded_images, query)
     try:
@@ -102,7 +105,7 @@ def send_content_with_response_stream(system, base64_encoded_images, query):
 
 
 @st.cache_data(show_spinner=False)
-def read_images(system, images, query):
+def read_images(model_id, system, images, query):
     """Describe the content of image"""
     base64_encoded_images = []
     images_size = ""
@@ -113,7 +116,7 @@ def read_images(system, images, query):
             base64_encoded_image = base64.b64encode(image.getvalue()).decode("utf-8")
             base64_encoded_images.append(base64_encoded_image)
             images_size += f"{image.size // 1024} KB, "
-    response = send_content(system, base64_encoded_images, query)
+    response = send_content(model_id, system, base64_encoded_images, query)
     return (
         f"{response['content'][0]['text']}\n\n"
         f"----------------\n"
@@ -122,7 +125,7 @@ def read_images(system, images, query):
     )
 
 
-def read_images_with_response_stream(system, images, query):
+def read_images_with_response_stream(model_id, system, images, query):
     """Describe the content of image with response stream"""
     base64_encoded_images = []
     images_size = ""
@@ -134,7 +137,9 @@ def read_images_with_response_stream(system, images, query):
             base64_encoded_image = base64.b64encode(image.getvalue()).decode("utf-8")
             base64_encoded_images.append(base64_encoded_image)
             images_size += f"{image.size // 1024} KB, "
-    response = send_content_with_response_stream(system, base64_encoded_images, query)
+    response = send_content_with_response_stream(
+        model_id, system, base64_encoded_images, query
+    )
     if response:
         for event in response:
             chunk = event.get("chunk")
@@ -174,6 +179,7 @@ response_window = st.empty()
 
 with prompt_window:
     with st.form("prompt", clear_on_submit=False, border=False):
+        model_id = st.selectbox(label="Select model:", index=0, options=model_ids)
         system_prompt = st.text_area("System prompt:", default_system_prompt)
         prompt = st.text_area("User prompt:", default_prompt)
         submitted = st.form_submit_button("Submit")
@@ -190,7 +196,9 @@ if submitted:
     response = ""
     with response_window:
         with st.spinner("Reading..."):
-            stream = read_images_with_response_stream(system_prompt, images, prompt)
+            stream = read_images_with_response_stream(
+                model_id, system_prompt, images, prompt
+            )
             for token in stream:
                 if token == "message_start":
                     break
