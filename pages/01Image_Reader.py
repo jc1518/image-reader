@@ -17,8 +17,6 @@ else:
     )
 
 prompt_window = st.sidebar.empty()
-
-source_window = st.empty()
 image_window = st.empty()
 response_window = st.empty()
 
