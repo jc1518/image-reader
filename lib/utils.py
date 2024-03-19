@@ -228,3 +228,36 @@ def delete_image_from_library(image_path):
     os.remove(image_path)
     image_id = image_path.split("/")[-1]
     delete_embedding_from_chroma(ids=[image_id])
+
+
+def generate_images(prompt, **kwargs):
+    """Generate images"""
+    number_of_images = kwargs.get("number_of_images", constants.NUMBER_OF_IMAGES)
+    quality = kwargs.get("quality", constants.QUALITY)
+    cfg_scale = kwargs.get("cfg_scale", constants.CFG_SCALE)
+    height = kwargs.get("height", constants.HEIGHT)
+    width = kwargs.get("width", constants.WIDTH)
+    seed = kwargs.get("seed", constants.SEED)
+    try:
+        request = json.dumps(
+            {
+                "taskType": "TEXT_IMAGE",
+                "textToImageParams": {"text": prompt},
+                "imageGenerationConfig": {
+                    "numberOfImages": number_of_images,
+                    "quality": quality,
+                    "cfgScale": cfg_scale,
+                    "height": height,
+                    "width": width,
+                    "seed": seed,
+                },
+            }
+        )
+        response = bedrock_runtime.invoke_model(
+            modelId=constants.IMAGE_GENERATOR_MODEL, body=request
+        )
+        response_body = json.loads(response.get("body").read())
+        base64_image_data = response_body["images"]
+    except Exception as err:
+        raise
+    return base64_image_data
