@@ -8,6 +8,8 @@ from lib import utils
 
 st.header("Image Reader 👀", divider=True)
 
+utils.setup_storage()
+
 take_photo = st.sidebar.toggle("Use camera")
 if take_photo:
     images = [st.camera_input("Camera")]

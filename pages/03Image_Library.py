@@ -10,13 +10,7 @@ from lib import utils
 
 st.header("Image Library 📚", divider=True)
 
-for data_storage in [
-    constants.DATA_LOCATION,
-    constants.VECTOR_LOCATION,
-    constants.FILE_LOCATION,
-]:
-    if not os.path.exists(data_storage):
-        os.mkdir(data_storage)
+utils.setup_storage()
 
 source_window = st.sidebar.empty()
 st.sidebar.divider()

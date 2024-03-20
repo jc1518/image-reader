@@ -1,5 +1,7 @@
 """Image Generator"""
 
+import os
+import uuid
 import base64
 
 import streamlit as st
@@ -8,6 +10,8 @@ from lib import constants
 from lib import utils
 
 st.header("Image Generator 🖨️", divider=True)
+
+utils.setup_storage()
 
 prompt_window = st.sidebar.empty()
 
@@ -34,4 +38,4 @@ if prompt and submitted:
             seed=seed,
         )
         images = [base64.b64decode(image) for image in base64_encoded_images]
-    generated_images = st.image(images)
+    st.image(images)

@@ -53,9 +53,13 @@ IMAGE_SIZE = [
     (1152, 640),
     (1173, 640),
 ]
-# Persistent storage
+
+# Chroma setting
+COLLECTION_NAME = "image_library"
+N_RESULTS = 1
+
+# Persistent storage setting
 DATA_LOCATION = "./data"
 VECTOR_LOCATION = f"{DATA_LOCATION}/vector"
 FILE_LOCATION = f"{DATA_LOCATION}/file"
-COLLECTION_NAME = "image_library"
-N_RESULTS = 1
+TEMP_LOCATION = f"{DATA_LOCATION}/temp"

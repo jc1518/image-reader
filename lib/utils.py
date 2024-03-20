@@ -30,6 +30,18 @@ accept = "application/json"
 content_type = "application/json"
 
 
+def setup_storage():
+    """Setup local storage"""
+    for data_storage in [
+        constants.DATA_LOCATION,
+        constants.VECTOR_LOCATION,
+        constants.FILE_LOCATION,
+        constants.TEMP_LOCATION,
+    ]:
+        if not os.path.exists(data_storage):
+            os.mkdir(data_storage)
+
+
 @st.cache_data(show_spinner=False)
 def format_content_for_claude3(base64_encoded_images, query):
     """Format content per claude 3 message format"""
