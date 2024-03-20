@@ -34,4 +34,4 @@ if prompt and submitted:
             seed=seed,
         )
         images = [base64.b64decode(image) for image in base64_encoded_images]
-    st.image(images)
+    generated_images = st.image(images)
