@@ -28,7 +28,8 @@ with source_window:
         add_submitted = st.form_submit_button("Add to image library")
 
 if images and add_submitted:
-    utils.add_images_to_library(images)
+    with st.spinner("Adding images..."):
+        utils.add_images_to_library(images)
     images_in_library = utils.get_images_in_library()
 
 with images_window:

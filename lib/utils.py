@@ -232,7 +232,7 @@ def get_images_in_library():
             os.path.join(constants.FILE_LOCATION, image)
             for image in os.listdir(constants.FILE_LOCATION)
             if mimetypes.guess_type(os.path.join(constants.FILE_LOCATION, image))[0]
-            == "image/png"
+            in ("image/png", "image/jpeg")
         ]
     )
     return sorted_images_list
