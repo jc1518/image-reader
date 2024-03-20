@@ -42,6 +42,7 @@ with images_window:
         selected_image = image_select(
             label="Click image to preview:",
             images=images_in_library,
+            captions=[image.split("/")[-1] for image in images_in_library],
         )
 
 with preview_window:
