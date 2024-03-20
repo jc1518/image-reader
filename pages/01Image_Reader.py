@@ -27,6 +27,7 @@ with prompt_window:
         )
         system_prompt = st.text_area("System prompt:", constants.DEFAULT_SYSTEM_PROMPT)
         prompt = st.text_area("User prompt:", constants.DEFAULT_PROMPT)
+        add_to_image_library = st.checkbox("Add to image library")
         submitted = st.form_submit_button("Submit")
 
 with image_window:
@@ -50,3 +51,6 @@ if submitted:
         for token in stream:
             response += token
             st.write(response.replace("$", "\$"))
+    if images and add_to_image_library:
+        print(images)
+        utils.add_images_to_library(images)
