@@ -8,6 +8,8 @@ from lib import utils
 
 st.header("Image Reader 👀", divider=True)
 
+utils.setup_storage()
+
 take_photo = st.sidebar.toggle("Use camera")
 if take_photo:
     images = [st.camera_input("Camera")]
@@ -27,6 +29,7 @@ with prompt_window:
         )
         system_prompt = st.text_area("System prompt:", constants.DEFAULT_SYSTEM_PROMPT)
         prompt = st.text_area("User prompt:", constants.DEFAULT_PROMPT)
+        add_to_image_library = st.checkbox("Add to image library")
         submitted = st.form_submit_button("Submit")
 
 with image_window:
@@ -50,3 +53,7 @@ if submitted:
         for token in stream:
             response += token
             st.write(response.replace("$", "\$"))
+        if images and images != [None] and add_to_image_library:
+            print(images)
+            print(type(images))
+            utils.add_images_to_library(images)
