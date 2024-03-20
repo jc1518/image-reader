@@ -1,6 +1,7 @@
 """Image Helper"""
 
 import os
+import uuid
 import json
 import base64
 import logging
@@ -205,17 +206,20 @@ def add_images_to_library(images):
     embeddings = []
     metadatas = []
     for image in images:
-        logger.info(f"Adding {image.name} to image library.")
-        with open(os.path.join(constants.FILE_LOCATION, image.name), "wb") as f:
+        image_name = f"{uuid.uuid4()}.png"
+        if hasattr(image, "name"):
+            image_name = image.name
+        logger.info(f"Adding {image_name} to image library.")
+        with open(os.path.join(constants.FILE_LOCATION, image_name), "wb") as f:
             f.write(image.getbuffer())
-        image_ids.append(image.name)
+        image_ids.append(image_name)
         base64_encoded_image = base64.b64encode(image.getvalue()).decode("utf-8")
         body = format_content_for_titan_mm_embed(base64_encoded_image)
         embedding = generate_embeddings(body)["embedding"]
         embeddings.append(embedding)
         metadata = {
-            "image_id": image.name,
-            "file_path": f"{constants.FILE_LOCATION}/{image.name}",
+            "image_id": image_name,
+            "file_path": f"{constants.FILE_LOCATION}/{image_name}",
         }
         metadatas.append(metadata)
     upsert_embedding_to_chroma(image_ids, embeddings, metadatas)
