@@ -33,10 +33,12 @@ def crawl_prompt_list() -> Dict:
 @st.cache_data(show_spinner=False)
 def crawl_prompt(path: str) -> Dict:
     """Get a prompt details"""
-    contents = crawl_contents(f"{URL}{path}")
+    contents = crawl_contents(f"{URL}/{path}")
     prompt = {"system": "", "user": ""}
-    system_prompt = contents.find("td", string="System").find_next("td").get_text()
-    prompt["system"] = system_prompt
-    user_prompt = contents.find("td", string="User").find_next("td").get_text()
-    prompt["user"] = user_prompt
+    system_prompt = contents.find("td", string="System")
+    if system_prompt is not None:
+        prompt["system"] = system_prompt.find_next("td").get_text()
+    user_prompt = contents.find("td", string="User")
+    if user_prompt is not None:
+        prompt["user"] = user_prompt.find_next("td").get_text()
     return prompt
