@@ -15,7 +15,7 @@ A project to explore various foundation models that have vision capabilities in 
 
 - Default bedrock region is `us-west-2`, change the value of `bedrock_region` accordinly if you use other regions.
 
-- Request access to `Claude 3 model` in Bedrock if you have not done that.
+- Request access to `Claude 3 model` and `Titan model` in Bedrock if you have not done that.
 
 ## Usage
 
@@ -23,4 +23,5 @@ Setup AWS credentials, then run `streamlit run Home.py`.
 
 ## Demo
 
-https://youtu.be/1GbYEl1WGhY
+- [Image-Reader](https://youtu.be/1GbYEl1WGhY)
+- [Image-Finder](https://youtu.be/kEoj5funEnk)
