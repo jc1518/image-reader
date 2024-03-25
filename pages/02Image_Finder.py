@@ -12,24 +12,21 @@ st.header("Image Finder 🔎", divider=True)
 
 utils.setup_storage()
 
-source_window = st.sidebar.empty()
 image_window = st.empty()
 
+image = st.sidebar.file_uploader(
+    "Search by image", accept_multiple_files=False, type=["jpg", "png"]
+)
+source_window = st.sidebar.empty()
 with source_window:
     with st.form("image", clear_on_submit=False, border=False):
         query = st.text_input("Search by text")
-        image = st.file_uploader(
-            "Search by image", accept_multiple_files=False, type=["jpg", "png"]
-        )
         n_results = st.slider("Max number of results:", 1, 5, 1, 1)
         submitted = st.form_submit_button("Search")
 
 if image:
-    base64_encoded_image = base64.b64encode(image.getvalue()).decode("utf-8")
-    payload = utils.format_content_for_titan_mm_embed(
-        base64_encoded_image=base64_encoded_image
-    )
-    image_embedding = utils.generate_embeddings(payload)["embedding"]
+    st.sidebar.image(image)
+
 
 found_images = None
 if submitted:
@@ -41,6 +38,11 @@ if submitted:
                 query_texts=[query], n_results=n_results
             )
         elif image:
+            base64_encoded_image = base64.b64encode(image.getvalue()).decode("utf-8")
+            payload = utils.format_content_for_titan_mm_embed(
+                base64_encoded_image=base64_encoded_image
+            )
+            image_embedding = utils.generate_embeddings(payload)["embedding"]
             found_images = utils.find_similar_image(
                 query_embeddings=[image_embedding], n_results=n_results
             )
