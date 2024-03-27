@@ -1,0 +1,12 @@
+name: image-reader
+cidr: 10.1.0.0/16
+maxAz: 2
+natGateways: 1
+privateCidrMask: 24
+publicCidrMask: 24
+domain: replace-with-your-domain
+host: image-reader
+zoneId: replace-with-your-domain-route53-zone-id
+allowedIps:
+  - replace-with-your-ip-address-1-cidr
+  - replace-with-your-ip-address-2-cidr

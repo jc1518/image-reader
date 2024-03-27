@@ -1,7 +1,18 @@
+# Node
+*.js
+!jest.config.js
+*.d.ts
+node_modules
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+cdk.context.json
+my-config.yaml
+
+# Python
+.venv
 venv
-.vscode
 __pycache__/
-.DS_Store
-data
-.ipynb_checkpoints
-more_samples
+
+.$architecture.drawio.bkp
