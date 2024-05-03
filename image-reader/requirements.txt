@@ -304,7 +304,7 @@ toolz==0.12.1
     # via altair
 tornado==6.4
     # via streamlit
-tqdm==4.66.2
+tqdm==4.66.3
     # via
     #   chromadb
     #   huggingface-hub
