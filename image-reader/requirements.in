@@ -1,6 +1,6 @@
 streamlit==1.31.1
 boto3==1.34.57
-Jinja2==3.1.3
+Jinja2==3.1.4
 chromadb==0.4.24
 requests
 bs4
