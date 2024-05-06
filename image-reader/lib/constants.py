@@ -5,8 +5,9 @@ BOTO_CONFIG = {"max_attempts": 3, "mode": "standard"}
 # Anthropic setting
 ANTHROPIC_VERSION = "bedrock-2023-05-31"
 MODEL_IDS = [
-    "anthropic.claude-3-sonnet-20240229-v1:0",
     "anthropic.claude-3-haiku-20240307-v1:0",
+    "anthropic.claude-3-sonnet-20240229-v1:0",
+    "anthropic.claude-3-opus-20240229-v1:0",
 ]
 MAX_TOKENS = 2000
 TEMPERATURE = 0
