@@ -90,7 +90,7 @@ huggingface-hub==0.21.4
     # via tokenizers
 humanfriendly==10.0
     # via coloredlogs
-idna==3.6
+idna==3.7
     # via
     #   anyio
     #   requests
