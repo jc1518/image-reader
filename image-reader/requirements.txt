@@ -95,9 +95,7 @@ idna==3.7
     #   anyio
     #   requests
 importlib-metadata==6.11.0
-    # via
-    #   opentelemetry-api
-    #   streamlit
+    # via opentelemetry-api
 importlib-resources==6.3.1
     # via chromadb
 jinja2==3.1.4
@@ -235,7 +233,6 @@ python-dateutil==2.9.0.post0
     #   kubernetes
     #   pandas
     #   posthog
-    #   streamlit
 python-dotenv==1.0.1
     # via uvicorn
 pytz==2024.1
@@ -284,7 +281,7 @@ soupsieve==2.5
     # via beautifulsoup4
 starlette==0.36.3
     # via fastapi
-streamlit==1.31.1
+streamlit==1.37.0
     # via
     #   -r requirements.in
     #   streamlit-image-select
@@ -322,8 +319,6 @@ typing-extensions==4.10.0
     #   typer
 tzdata==2024.1
     # via pandas
-tzlocal==5.2
-    # via streamlit
 urllib3==2.2.1
     # via
     #   botocore
@@ -333,8 +328,6 @@ uvicorn[standard]==0.28.0
     # via chromadb
 uvloop==0.19.0
     # via uvicorn
-validators==0.22.0
-    # via streamlit
 watchdog==4.0.0
     # via
     #   -r requirements.in
